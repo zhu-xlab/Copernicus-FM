@@ -1,0 +1,26 @@
+defaults:
+  - base_dataset
+
+dataset_type: cobench_airquality_s5p
+task: regression
+dataset_name: cobench_airquality_no2_s5p
+num_classes: 1
+num_channels: 1
+masknan: true
+data_path: ${oc.env:DATASETS_DIR}/copernicusbench/airquality_s5p
+modality: no2
+mode: annual # seasonal
+band_names: ['tropospheric_NO2_column_number_density'] # not used
+band_wavelengths: [430] # not used
+band_bandwidths: [60] # not used
+band_stats: null
+target_stats:
+  mean: [5.3167]
+  std: [3.9948]
+image_resolution: 56
+multilabel: false
+#ignore_index: null
+language_embed: null
+input_mode: variable
+kernel_size: 4
+key: s5p_no2 # only valid for non-spectral variables

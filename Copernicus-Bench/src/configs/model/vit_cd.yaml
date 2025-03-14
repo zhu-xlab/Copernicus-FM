@@ -1,0 +1,12 @@
+defaults:
+  - base_model
+
+model_type: vit
+task: changedetection
+vit_size: base #small
+#image_resolution: 224
+embed_dim: 768 #384
+pretrained_path: null
+out_features: true
+#full_finetune: true
+freeze_backbone: true

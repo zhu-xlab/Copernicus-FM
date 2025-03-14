@@ -1,0 +1,11 @@
+defaults:
+  - base_model
+
+model_type: dofa
+task: changedetection
+dofa_size: dofa_base #dofa_large
+image_resolution: 224
+embed_dim: 768 #1024
+pretrained_path: "DOFA_ViT_base_e100.pth" #"DOFA_ViT_large_e100.pth"
+out_features: true
+full_finetune: false

@@ -1,0 +1,11 @@
+defaults:
+  - base_model
+
+model_type: dofa
+task: regression
+dofa_size: dofa_base #dofa_small
+image_resolution: 224
+embed_dim: 768 #384
+pretrained_path: "DOFA_ViT_base_e100.pth" 
+out_features: true
+full_finetune: false

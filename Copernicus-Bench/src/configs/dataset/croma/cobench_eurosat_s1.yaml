@@ -1,0 +1,16 @@
+defaults:
+  - base_dataset
+
+dataset_type: cobench_eurosat_s1
+task: classification
+dataset_name: cobench_eurosat_s1
+num_classes: 10
+num_channels: 2
+data_path: ${oc.env:DATASETS_DIR}/copernicusbench/eurosat_s1
+band_names: ['VV', 'VH']
+band_stats:
+  mean: [-12.548, -20.192]
+  std: [5.257, 5.912]
+image_resolution: 120
+multilabel: false
+ignore_index: null

@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Copernicus-Bench"
+adapted_from = "https://github.com/xiong-zhitong/DOFA-pytorch"
+
+dependencies = [
+    "torch==2.1.2",
+    "torchvision==0.16.2",
+    "numpy==1.26.4",
+    "openmim",
+    "mmsegmentation==1.2.2",
+    "mmcv==2.1.0",
+    "tensorboard",
+    "loguru",
+    "timm",
+    #"geobench",
+    "torchmetrics",
+    "ftfy",
+    "regex",
+    "Cython",
+    "einops",
+    "yacs",
+    "kornia",
+    "pydantic",
+    "omegaconf",
+    "wandb",
+    "python-dotenv",
+    "torchgeo @ git+https://github.com/microsoft/torchgeo.git",
+    "fastparquet",
+    "mlflow",
+    #"ray>=2.40.0",
+    #"huggingface-hub>=0.27.1",
+    #"peft>=0.14.0",
+    #"optuna",
+    "opencv-python-headless",
+    "h5py",
+    "rioxarray",
+]
+
+[tool.pytest.ini_options]
+
+filterwarnings = [
+    # Expected warnings
+    # ignore num workers
+    "ignore:The 'val_dataloader' does not have many workers which may be a bottleneck:UserWarning",
+    "ignore:The 'train_dataloader' does not have many workers which may be a bottleneck:UserWarning",
+    # ignore cpu
+    "ignore:GPU available but not used.:UserWarning",
+    # ignore xformers
+    "ignore:xFormers is not available:UserWarning"
+]
+
+

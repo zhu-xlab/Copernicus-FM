@@ -1,0 +1,13 @@
+defaults:
+  - base_model
+
+model_type: softcon
+task: segmentation
+size: base
+modality: optical
+image_resolution: 224
+embed_dim: 768
+pretrained_path: "B13_vitb14_softcon.pth"
+num_channels: 13
+out_features: true
+freeze_backbone: true

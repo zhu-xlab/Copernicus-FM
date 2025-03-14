@@ -1,0 +1,11 @@
+defaults:
+  - base_model
+
+model_type: copernicusfm
+task: changedetection
+model_size: base
+image_resolution: 224
+embed_dim: 768
+pretrained_path: "CopernicusFM_ViT_base_varlang_e100.pth"
+out_features: true
+full_finetune: false

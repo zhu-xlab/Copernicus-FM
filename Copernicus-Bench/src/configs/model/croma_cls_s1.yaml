@@ -1,0 +1,12 @@
+defaults:
+  - base_model
+
+model_type: croma
+task: classification
+size: base
+modality: SAR
+image_resolution: 120
+pretrained_path: "CROMA_base.pt"
+num_channels: 12
+out_features: true
+freeze_backbone: true

@@ -1,0 +1,22 @@
+defaults:
+  - base_dataset
+
+dataset_type: cobench_lcz_s12
+task: classification
+dataset_name: cobench_lcz_s2
+num_classes: 17
+num_channels: 10
+data_path: ${oc.env:DATASETS_DIR}/copernicusbench/lcz_s1s2
+band_names: ['S2_B02', 'S2_B03', 'S2_B04', 'S2_B05', 'S2_B06', 'S2_B07', 'S2_B08', 'S2_B8A', 'S2_B11', 'S2_B12']
+band_wavelengths: [490, 560, 665, 705, 740, 783, 842, 860, 1610, 2190]
+band_bandwidths: [65, 35, 30, 15, 15, 20, 115, 20, 90, 180]
+band_stats: # null
+  mean: [0.112, 0.104, 0.095, 0.120, 0.200, 0.237, 0.230, 0.260, 0.182, 0.112]
+  std: [0.074, 0.068, 0.062, 0.079, 0.134, 0.160, 0.155, 0.175, 0.122, 0.074]
+image_resolution: 112
+multilabel: false
+ignore_index: null
+language_embed: null
+input_mode: spectral
+kernel_size: 16
+key: null # only valid for non-spectral variables

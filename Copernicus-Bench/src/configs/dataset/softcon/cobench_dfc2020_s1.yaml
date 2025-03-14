@@ -1,0 +1,20 @@
+defaults:
+  - base_dataset
+
+dataset_type: cobench_dfc2020_s12
+task: segmentation
+dataset_name: cobench_dfc2020_s1
+num_classes: 8 # origin 10 but 2 not present
+num_channels: 2
+data_path: ${oc.env:DATASETS_DIR}/copernicusbench/dfc2020_s1s2
+modality: s1
+band_names: ['VV', 'VH']
+band_stats: # null
+  mean: [-12.548, -20.192]
+  std: [5.257, 5.912]
+  # mean: [-23.062, -32.016]
+  # std: [21.028, 23.648]
+norm_form: softcon
+image_resolution: 224 # multiplier of patch size 14
+multilabel: false
+ignore_index: 255

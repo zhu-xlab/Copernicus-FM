@@ -1,0 +1,26 @@
+defaults:
+  - base_dataset
+
+dataset_type: cobench_airquality_s5p
+task: regression
+dataset_name: cobench_airquality_o3_s5p
+num_classes: 1
+num_channels: 1
+masknan: true
+data_path: ${oc.env:DATASETS_DIR}/copernicusbench/airquality_s5p
+modality: o3
+mode: annual # seasonal
+band_names: ['O3_column_number_density'] # not used
+band_wavelengths: [300] # not used
+band_bandwidths: [30] # not used
+band_stats: null
+target_stats:
+  mean: [4654.2632]
+  std: [2589.4207]
+image_resolution: 56
+multilabel: false
+#ignore_index: null
+language_embed: null
+input_mode: variable
+kernel_size: 4
+key: s5p_o3 # only valid for non-spectral variables

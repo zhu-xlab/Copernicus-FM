@@ -1,0 +1,13 @@
+defaults:
+  - base_model
+
+model_type: croma
+task: segmentation
+size: base
+modality: optical
+image_resolution: 256
+embed_dim: 768
+pretrained_path: "CROMA_base.pt"
+num_channels: 12
+out_features: true
+freeze_backbone: true

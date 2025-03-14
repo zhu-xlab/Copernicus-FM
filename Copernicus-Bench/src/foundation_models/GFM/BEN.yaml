@@ -1,0 +1,23 @@
+MODEL:
+  TYPE: swin
+  NAME: simmim_finetune
+  DROP_PATH_RATE: 0.1
+  SWIN:
+    EMBED_DIM: 128
+    DEPTHS: [ 2, 2, 18, 2 ]
+    NUM_HEADS: [ 4, 8, 16, 32 ]
+    WINDOW_SIZE: 4
+    IN_CHANS: 3
+DATA:
+  IMG_SIZE: 128
+TRAIN:
+  EPOCHS: 100
+  WARMUP_EPOCHS: 20
+  BASE_LR: 1.0e-4
+  WARMUP_LR: 1.0e-7
+  MIN_LR: 1.0e-5
+  WEIGHT_DECAY: 0.05
+  LAYER_DECAY: 0.9
+PRINT_FREQ: 100
+SAVE_FREQ: 5
+TAG: simmim_finetune__swin_base__img128_window4__100ep

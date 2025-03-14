@@ -1,0 +1,7 @@
+dataset_type: null
+task: null  # Options: "classification", "segmentation", "regression", "changedetection"
+num_classes: null
+num_channels: null
+data_path: null
+band_wavelengths: null
+

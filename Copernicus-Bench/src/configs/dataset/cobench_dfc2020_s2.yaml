@@ -1,0 +1,26 @@
+defaults:
+  - base_dataset
+
+dataset_type: cobench_dfc2020_s12
+task: segmentation
+dataset_name: cobench_dfc2020_s2
+num_classes: 8 # origin 10 but 2 not present
+num_channels: 13
+data_path: ${oc.env:DATASETS_DIR}/copernicusbench/dfc2020_s1s2
+modality: s2
+band_names: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B8A', 'B09', 'B10', 'B11', 'B12']
+band_wavelengths: [440, 490, 560, 665, 705, 740, 783, 842, 860, 940, 1370, 1610, 2190]
+band_bandwidths: [20, 65, 35, 30, 15, 15, 20, 115, 20, 20, 30, 90, 180]
+band_stats: # null
+  # ssl4eo works better
+  mean: [1353.7,1117.2,1041.8,946.5,1199.1,2003.0,2374.0,2301.2,2599.7,732.1,12.1,1820.6,1118.2]
+  std: [897.3,736.0,684.8,620.0,791.9,1341.3,1595.4,1545.5,1750.1,475.1,98.3,1216.5,736.7]
+  # mean: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+  # std: [10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000]
+image_resolution: 256
+multilabel: false
+ignore_index: 255
+language_embed: null
+input_mode: spectral
+kernel_size: 16
+key: null # only valid for non-spectral variables

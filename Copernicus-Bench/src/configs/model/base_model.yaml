@@ -1,0 +1,9 @@
+model_type: null
+num_classes: 10
+task: classification
+band_wavelengths: null
+freeze_backbone: true
+image_resolution: 224
+additional_params: {}
+num_channels: 12
+multilabel: false
