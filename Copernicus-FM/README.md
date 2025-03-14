@@ -104,6 +104,8 @@ print(logit.shape, embed.shape)
 
 Check [demo.ipynb](demo.ipynb) for detailed examples.
 
+- [ ] TODO: Add more demonstration.
+
 ## License
 
 This directory is licensed under the Apache License 2.0. The model weights are licensed under the CC-BY-4.0 license.
