@@ -1,0 +1,10 @@
+torch
+torchvision
+kornia
+rasterio
+webdataset
+gzip
+earthengine-api
+matplotlib
+geopandas
+shapely
