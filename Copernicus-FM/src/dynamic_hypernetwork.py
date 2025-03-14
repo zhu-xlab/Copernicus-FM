@@ -472,7 +472,7 @@ class Dynamic_MLP_OFA_variable(nn.Module):
             llm_embed_path = os.path.join(script_dir, 'var_embed_llama3.2_1B.pt') # https://huggingface.co/wangyi111/CopernicusFM/blob/main/var_embed_llama3.2_1B.pt
             if not os.path.exists(llm_embed_path):
                 # download the var encoding from HF
-                url = "https://huggingface.co/wangyi111/CopernicusFM/blob/main/var_embed_llama3.2_1B.pt"
+                url = "https://huggingface.co/wangyi111/Copernicus-FM/resolve/main/var_embed_llama3.2_1B.pt"
                 download_url(url, script_dir, filename='var_embed_llama3.2_1B.pt')
 
             self.language_embed = torch.load(llm_embed_path) # 2048   

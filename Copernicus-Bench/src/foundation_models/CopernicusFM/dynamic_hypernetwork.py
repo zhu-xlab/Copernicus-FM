@@ -479,7 +479,7 @@ class Dynamic_MLP_OFA_variable(nn.Module):
                 #     cache_dir=script_dir,
                 #     local_dir=script_dir,
                 # )
-                url = "https://huggingface.co/wangyi111/CopernicusFM/blob/main/var_embed_llama3.2_1B.pt"
+                url = "https://huggingface.co/wangyi111/Copernicus-FM/resolve/main/var_embed_llama3.2_1B.pt"
                 download_url(url, script_dir, filename='var_embed_llama3.2_1B.pt')
 
             self.language_embed = torch.load(llm_embed_path) # 2048   
