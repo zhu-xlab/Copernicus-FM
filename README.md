@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![arXiv](https://img.shields.io/badge/arXiv-2503.11849-b31b1b.svg)](https://arxiv.org/abs/2503.11849)
 
-This repository contains the official implementation of the paper "Towards a Unified Copernicus Foundation Model for Earth Vision".
+This repository contains the official implementation of the paper "[Towards a Unified Copernicus Foundation Model for Earth Vision](https://arxiv.org/abs/2503.11849)".
 
 <div align="center">
 <img src="assets/altogether-1.png" alt="Description" style="width:70%;">
