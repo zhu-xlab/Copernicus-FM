@@ -39,7 +39,6 @@ class CopernicusFMViT(nn.Module):
         global_pool=True,
         mlp_ratio=4.0,
         norm_layer=nn.LayerNorm,
-        var_option='language',
         loc_option='lonlat',
     ):
         super().__init__()
@@ -53,9 +52,8 @@ class CopernicusFMViT(nn.Module):
         else:
             self.norm = norm_layer(embed_dim)
 
-
         self.patch_embed_spectral = Dynamic_MLP_OFA_spectral(wv_planes=128, inter_dim=128, kernel_size=16, embed_dim=embed_dim)
-        self.patch_embed_variable = Dynamic_MLP_OFA_variable(wv_planes=128, inter_dim=128, kernel_size=16, embed_dim=embed_dim, option=var_option)
+        self.patch_embed_variable = Dynamic_MLP_OFA_variable(wv_planes=128, inter_dim=128, kernel_size=16, embed_dim=embed_dim)
 
         self.num_patches = (img_size // patch_size) ** 2
 
@@ -131,16 +129,15 @@ class CopernicusFMViT(nn.Module):
         return time_embed.unsqueeze(1) # [B,1,D]
 
 
-    def forward_features(self, x, meta_info, key, wave_list, bandwidth, language_embed, input_mode, kernel_size=None):
+    def forward_features(self, x, meta_info, wave_list, bandwidth, language_embed, input_mode, kernel_size=None):
         # embed patches
-        wavelist = torch.tensor(wave_list, device=x.device).float()
-        bandwidths = torch.tensor(bandwidth, device=x.device).float()
-        self.waves = wavelist
-
         if input_mode == 'spectral':
+            wavelist = torch.tensor(wave_list, device=x.device).float()
+            bandwidths = torch.tensor(bandwidth, device=x.device).float()
+            self.waves = wavelist
             x, _ = self.patch_embed_spectral(x, self.waves, bandwidths, kernel_size)
         elif input_mode == 'variable':
-            x,waves = self.patch_embed_variable(key, x, self.waves, bandwidths, language_embed, kernel_size)
+            x, _ = self.patch_embed_variable(x, language_embed, kernel_size)
 
         # resize pos embed
         num_patches = x.size(1)
@@ -193,8 +190,8 @@ class CopernicusFMViT(nn.Module):
         x = self.head_drop(x)
         return x if pre_logits else self.head(x)
 
-    def forward(self, x, meta_info, key, wave_list, bandwidth, language_embed, input_mode, kernel_size=None):
-        fx = self.forward_features(x, meta_info, key, wave_list, bandwidth, language_embed, input_mode, kernel_size)
+    def forward(self, x, meta_info, wave_list, bandwidth, language_embed, input_mode, kernel_size=None):
+        fx = self.forward_features(x, meta_info, wave_list, bandwidth, language_embed, input_mode, kernel_size)
         x = self.forward_head(fx)
         return x, fx
 

@@ -10,7 +10,7 @@ from .aurora.fourier import FourierExpansion
 # CopernicusFM: dynamic patch size (follow flexivit)
 from .flexivit.patch_embed import pi_resize_patch_embed
 import os
-from torchvision.datasets.utils import download_url
+#from torchvision.datasets.utils import download_url
 
 
 random_seed = 1234
@@ -441,14 +441,13 @@ class Dynamic_MLP_OFA_spectral(nn.Module):
 
 class Dynamic_MLP_OFA_variable(nn.Module):
     """
-    Input: (op1--spectrum) channels of wavelength and bandwidth (sensitive): List -> List
-           (op2--language) language embedding of variable name: Pytorch tensor
+    Input: language embedding of variable name: Pytorch tensor
            kernel size of the depth-wise convolution: kernel_size, default 3x3
            wv_planes
            inplanes
     """
 
-    def __init__(self, wv_planes, inter_dim=128, kernel_size=3, embed_dim=1024, option='language'):
+    def __init__(self, wv_planes, inter_dim=128, kernel_size=3, embed_dim=1024):
         super().__init__()
         self.kernel_size = kernel_size
         self.wv_planes = wv_planes
@@ -458,31 +457,8 @@ class Dynamic_MLP_OFA_variable(nn.Module):
         self.inter_dim = inter_dim
         self.patch_size = (kernel_size, kernel_size)
         self.num_patches = -1
-        self.option = option
 
-
-        ## new: language or physics-driven mapping for non-spectral variables
-        if self.option == 'spectrum':
-            # op1: sensitive wavelength and bandwidth, in this case DEM is all zero
-            self.spectrum_central_expansion = FourierExpansion(100, 3000)
-            self.spectrum_bandwidth_expansion = FourierExpansion(1, 100)
-        elif self.option == 'language':
-            # op2: language embedding
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            llm_embed_path = os.path.join(script_dir, 'var_embed_llama3.2_1B.pt') # https://huggingface.co/wangyi111/CopernicusFM/blob/main/var_embed_llama3.2_1B.pt
-            if not os.path.exists(llm_embed_path):
-                # download the var encoding from HF
-                url = "https://huggingface.co/wangyi111/Copernicus-FM/resolve/main/var_embed_llama3.2_1B.pt"
-                download_url(url, script_dir, filename='var_embed_llama3.2_1B.pt')
-
-            self.language_embed = torch.load(llm_embed_path) # 2048   
-            self.language_embed['s5p_co'] = self.language_embed['Sentinel 5P Carbon Monoxide']
-            self.language_embed['s5p_no2'] = self.language_embed['Sentinel 5P Nitrogen Dioxide']
-            self.language_embed['s5p_o3'] = self.language_embed['Sentinel 5P Ozone']
-            self.language_embed['s5p_so2'] = self.language_embed['Sentinel 5P Sulfur Dioxide']
-            self.language_embed['dem'] = self.language_embed['Copernicus Digital Elevation Model']
-            self.language_proj = nn.Linear(2048, self.wv_planes) # project to the same dimension as wv_planes  
-
+        self.language_proj = nn.Linear(2048, self.wv_planes) # project to the same dimension as wv_planes  
 
         self.weight_generator = TransformerWeightGenerator(
             wv_planes, self._num_kernel, embed_dim
@@ -511,27 +487,14 @@ class Dynamic_MLP_OFA_variable(nn.Module):
         self.weight_generator.apply(self.weight_init)
         self.fclayer.apply(self.weight_init)
 
-    def forward(self, key, img_feat, wvs, bandwidths, language_embed, kernel_size=None):
+    def forward(self, img_feat, language_embed, kernel_size=None):
         """
         wvs: nm
         bandwidths: nm
         """
         # wv_feats: 9,128 -> 9, 3x3x3
-        #waves = get_1d_sincos_pos_embed_from_grid_torch(self.wv_planes, wvs * 1000) # dofa: fixed sincos pos embedding
-        if self.option == 'spectrum':
-            # op1: absorption wavelength and bandwidth, in this case DEM is all zero
-            emb_central = self.spectrum_central_expansion(wvs,self.wv_planes)
-            emb_bandwidth = self.spectrum_bandwidth_expansion(bandwidths,self.wv_planes)
-            waves = emb_central + emb_bandwidth # simply add two embeddings, can be more complex later
-        elif self.option == 'language':
-            # op2: language embedding
-            if language_embed is None and key in self.language_embed.keys():
-                emb_language = self.language_embed[key].to(img_feat.device) # 2048
-            else:
-                emb_language = language_embed
-            # expand to B,2048
-            emb_language = emb_language.unsqueeze(0)
-            waves = self.language_proj(emb_language)
+        emb_language = language_embed.unsqueeze(0)
+        waves = self.language_proj(emb_language)
             #print(waves.size())
 
         waves = self.fclayer(waves)
