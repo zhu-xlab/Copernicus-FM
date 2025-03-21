@@ -36,8 +36,8 @@ L1: preprocessing, L2: base applications, L3: specialized applications. *: time 
 The benchmark datasets are available on [HuggingFace](https://huggingface.co/datasets/wangyi111/Copernicus-Bench). Optionaly, you can use the [`download_copernicus_bench.sh`](tools/download_copernicus_bench.sh) script to download all the datasets.
 
 ```bash
-mkdir -p data/copernicus-bench
-cd data/copernicus-bench
+mkdir -p data/copernicusbench
+cd data/copernicusbench
 bash tools/download_copernicus_bench.sh
 ```
 

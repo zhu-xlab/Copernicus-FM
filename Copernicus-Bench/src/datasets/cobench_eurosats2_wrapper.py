@@ -62,7 +62,7 @@ class CoBenchEuroSATS2(EuroSAT):
         self.bands = bands
         self.band_indices = [(self.all_band_names.index(b)+1) for b in bands if b in self.all_band_names]
 
-        self._verify()
+        #self._verify()
 
         self.valid_fns = []
         self.classes = []

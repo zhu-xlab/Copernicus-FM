@@ -73,6 +73,7 @@ class CoBenchCloudS3(NonGeoDataset):
 
         self.bands = bands
         self.band_indices = [(self.all_band_names.index(b)+1) for b in bands if b in self.all_band_names]
+        self.band_scales = [self.all_band_scale[self.all_band_names.index(b)] for b in bands if b in self.all_band_names]
 
         self.mode = mode
         self.img_dir = os.path.join(self.root, 's3_olci')
@@ -114,8 +115,8 @@ class CoBenchCloudS3(NonGeoDataset):
             img = src.read(self.band_indices)
             img[np.isnan(img)] = 0
             chs = []
-            for b in range(21):
-                ch = img[b]*self.all_band_scale[b]
+            for b in range(img.shape[0]):
+                ch = img[b]*self.band_scales[b]
                 #ch = cv2.resize(ch, (256,256), interpolation=cv2.INTER_CUBIC)
                 chs.append(ch)
             img = np.stack(chs)

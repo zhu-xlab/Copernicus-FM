@@ -26,7 +26,7 @@ class CoBenchAirQualityS5P(NonGeoDataset):
         'val': 'val.csv',
         'test': 'test.csv',
     }
-    # stats for training set
+    # target stats for training set
     label_stats = {
         'no2': {'mean': 5.3167, 'std': 3.9948},
         'o3': {'mean': 4654.2632, 'std': 2589.4207},

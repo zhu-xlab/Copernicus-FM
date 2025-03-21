@@ -6,6 +6,7 @@ task: classification
 dataset_name: cobench_lcz_s2
 num_classes: 17
 num_channels: 10
+modality: s2
 data_path: ${oc.env:DATASETS_DIR}/copernicusbench/lcz_s1s2
 band_names: ['S2_B02', 'S2_B03', 'S2_B04', 'S2_B05', 'S2_B06', 'S2_B07', 'S2_B08', 'S2_B8A', 'S2_B11', 'S2_B12']
 band_wavelengths: [490, 560, 665, 705, 740, 783, 842, 860, 1610, 2190]

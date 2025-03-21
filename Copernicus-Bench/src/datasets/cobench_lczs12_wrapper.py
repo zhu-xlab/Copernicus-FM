@@ -81,7 +81,8 @@ class CoBenchLCZS12(So2Sat):
         root: Path = 'data',
         version: str = 'cobench', # only supported version
         split: str = 'train',
-        bands: Sequence[str] = BAND_SETS['s2'], # only supported bands now
+        modality: str = 's2',
+        bands: Sequence[str] = BAND_SETS['s2'],
         transforms: Callable[[dict[str, Tensor]], dict[str, Tensor]] | None = None,
         download: bool = False,
     ) -> None:
@@ -110,6 +111,7 @@ class CoBenchLCZS12(So2Sat):
 
         self.s2_band_names = [self.all_s2_band_names[i] for i in self.s2_band_indices]
 
+        self.modality = modality
         self.bands = bands
 
         self.root = root
@@ -138,25 +140,26 @@ class CoBenchLCZS12(So2Sat):
         Returns:
             data and label at that index
         """
-        #h5py = lazy_import('h5py')
-        with h5py.File(self.fn, 'r') as f:
-            #s1 = f['sen1'][index].astype(np.float32)
-            #s1 = np.take(s1, indices=self.s1_band_indices, axis=2)
-            s2 = f['sen2'][index].astype(np.float32)
-            s2 = np.take(s2, indices=self.s2_band_indices, axis=2)
 
+        with h5py.File(self.fn, 'r') as f:
+            if self.modality == 's1':
+                s1 = f['sen1'][index].astype(np.float32)
+                s1 = np.take(s1, indices=self.s1_band_indices, axis=2)
+                s1 = np.rollaxis(s1, 2, 0)  # convert to CxHxW format
+                s1 = torch.from_numpy(s1)
+                image = s1
+            elif self.modality == 's2':
+                s2 = f['sen2'][index].astype(np.float32)
+                s2 = np.take(s2, indices=self.s2_band_indices, axis=2)
+                s2 = np.rollaxis(s2, 2, 0)  # convert to CxHxW format
+                s2 = torch.from_numpy(s2)
+                image = s2
             # convert one-hot encoding to int64 then torch int
             label = torch.tensor(f['label'][index].argmax())
 
-            #s1 = np.rollaxis(s1, 2, 0)  # convert to CxHxW format
-            s2 = np.rollaxis(s2, 2, 0)  # convert to CxHxW format
-
-            #s1 = torch.from_numpy(s1)
-            s2 = torch.from_numpy(s2)
-
         meta_info = np.array([np.nan, np.nan, np.nan, self.patch_area]).astype(np.float32)
-
-        sample = {'image': s2, 'label': label, 'meta': torch.from_numpy(meta_info)}
+        
+        sample = {'image': image, 'label': label, 'meta': torch.from_numpy(meta_info)}
 
         if self.transforms is not None:
             sample = self.transforms(sample)
@@ -261,6 +264,7 @@ class CoBenchLCZS12Dataset:
         self.dataset_config = config
         self.img_size = (config.image_resolution, config.image_resolution)
         self.root_dir = config.data_path
+        self.modality = config.modality
         self.bands = config.band_names
         self.band_stats = config.band_stats
         self.norm_form = config.norm_form if 'norm_form' in config else None
@@ -276,13 +280,13 @@ class CoBenchLCZS12Dataset:
             eval_transform = ClsDataAugmentation(split="test", size=self.img_size, band_stats=self.band_stats)
 
         dataset_train = CoBenchLCZS12(
-            root=self.root_dir, split="train", bands=self.bands, transforms=train_transform
+            root=self.root_dir, split="train", modality=self.modality, bands=self.bands, transforms=train_transform
         )
         dataset_val = CoBenchLCZS12(
-            root=self.root_dir, split="val", bands=self.bands, transforms=eval_transform
+            root=self.root_dir, split="val", modality=self.modality, bands=self.bands, transforms=eval_transform
         )
         dataset_test = CoBenchLCZS12(
-            root=self.root_dir, split="test", bands=self.bands, transforms=eval_transform
+            root=self.root_dir, split="test", modality=self.modality, bands=self.bands, transforms=eval_transform
         )
 
         return dataset_train, dataset_val, dataset_test

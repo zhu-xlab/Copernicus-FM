@@ -36,7 +36,7 @@ class CoBenchBigEarthNetS12(NonGeoDataset):
         root: str = "data",
         split: str = "train",
         modality: str = "s2",
-        band_names: Sequence[str] = ('B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B8A', 'B09', 'B11', 'B12'),
+        bands: Sequence[str] = ('B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B8A', 'B09', 'B11', 'B12'),
         transforms: Optional[Callable[[dict[str, Tensor]], dict[str, Tensor]]] = None,
         download: bool = False,
         checksum: bool = False,
@@ -50,12 +50,12 @@ class CoBenchBigEarthNetS12(NonGeoDataset):
         self.transforms = transforms
 
 
-        self.band_names = band_names
+        self.bands = bands
         if self.modality == 's1':
             self.all_band_names = self.all_band_names_s1
         else:
             self.all_band_names = self.all_band_names_s2
-        self.band_indices = [(self.all_band_names.index(b)+1) for b in band_names if b in self.all_band_names]
+        self.band_indices = [(self.all_band_names.index(b)+1) for b in bands if b in self.all_band_names]
 
         self.img_paths = []
         self.labels = []
@@ -240,7 +240,7 @@ class CoBenchBigEarthNetS12Dataset:
         self.img_size = (config.image_resolution, config.image_resolution)
         self.root_dir = config.data_path
         self.modality = config.modality
-        self.band_names = config.band_names
+        self.bands = config.band_names
         self.band_stats = config.band_stats
         self.norm_form = config.norm_form if 'norm_form' in config else None
 
@@ -265,7 +265,7 @@ class CoBenchBigEarthNetS12Dataset:
             root=self.root_dir,
             split="train",
             modality=self.modality,
-            band_names=self.band_names,
+            bands=self.bands,
             transforms=train_transform,
         )
 
@@ -273,14 +273,14 @@ class CoBenchBigEarthNetS12Dataset:
             root=self.root_dir,
             split="val",
             modality=self.modality,
-            band_names=self.band_names,
+            bands=self.bands,
             transforms=eval_transform,
         )
         dataset_test = CoBenchBigEarthNetS12(
             root=self.root_dir,
             split="test",
             modality=self.modality,
-            band_names=self.band_names,
+            bands=self.bands,
             transforms=eval_transform,
         )
 

@@ -1,6 +1,6 @@
 import logging
 import os
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import date
 from typing import TypeAlias
 
@@ -21,6 +21,11 @@ Path: TypeAlias = str | os.PathLike[str]
 class CoBenchBiomassS3(NonGeoDataset):
     url = "https://huggingface.co/datasets/wangyi111/Copernicus-Bench/resolve/main/l3_biomass_s3/biomass_s3.zip"
     splits = ("train", "test", "val")
+    static_filenames = {
+        'train': 'static_fnames-train.csv',
+        'val': 'static_fnames-val.csv',
+        'test': 'static_fnames-test.csv',
+    }
     all_band_names = (
         "Oa01_radiance",
         "Oa02_radiance",
@@ -67,7 +72,8 @@ class CoBenchBiomassS3(NonGeoDataset):
         0.00326378,
         0.00324118,
     )
-    # stats for training set
+    rgb_bands = ('Oa08_radiance', 'Oa06_radiance', 'Oa04_radiance')
+    # target stats for training set (for regression normalization)
     biomass_mean = 92.3196 #93.8317
     biomass_std = 117.8162 #110.5369
 
@@ -75,6 +81,7 @@ class CoBenchBiomassS3(NonGeoDataset):
         self,
         root: Path = "data",
         split: str = "train",
+        bands: Sequence[str] = all_band_names,
         mode: str = "static",  # or 'series'
         transforms: Callable[[dict[str, Tensor]], dict[str, Tensor]] | None = None,
         download: bool = False,
@@ -87,20 +94,23 @@ class CoBenchBiomassS3(NonGeoDataset):
         assert split in ["train", "test", "val"]
         self.split = split
 
-        self.img_dir = os.path.join(root, split, "s3_olci")
-        self.biomass_dir = os.path.join(root, split, "biomass")
+        self.bands = bands
+        self.band_indices = [(self.all_band_names.index(b)+1) for b in bands if b in self.all_band_names]
+        self.band_scales = [self.all_band_scale[i-1] for i in self.band_indices]
 
-        self.pids = os.listdir(self.biomass_dir)
+        self.img_dir = os.path.join(root, "s3_olci")
+        self.biomass_dir = os.path.join(root, "biomass")
 
-        if self.mode == "static":
-            self.static_csv = os.path.join(root, split, "static_fnames.csv")
-            with open(self.static_csv, "r") as f:
-                lines = f.readlines()
-                self.static_img = {}
-                for line in lines:
-                    dirname = line.strip().split(",")[0]
-                    img_fname = line.strip().split(",")[1]
-                    self.static_img[dirname] = img_fname
+        self.static_csv = os.path.join(self.root, self.static_filenames[split])
+        with open(self.static_csv, 'r') as f:
+            lines = f.readlines()
+            self.static_img = {}
+            for line in lines:
+                pid = line.strip().split(',')[0]
+                img_fname = line.strip().split(',')[1]
+                self.static_img[pid] = img_fname
+
+        self.pids = list(self.static_img.keys())
 
         self.reference_date = date(1970, 1, 1)
         self.patch_area = (16 * 0.3) ** 2  # patchsize 16 pix, gsd 300m
@@ -124,10 +134,10 @@ class CoBenchBiomassS3(NonGeoDataset):
 
     def _load_image(self, index):
         pid = self.pids[index]
-        s3_path = os.path.join(self.img_dir, pid.replace(".tif", ""))
+        s3_path = os.path.join(self.img_dir, pid)
 
         if self.mode == "static":
-            img_fname = self.static_img[pid.replace(".tif", "")]
+            img_fname = self.static_img[pid]
             s3_paths = [os.path.join(s3_path, img_fname)]
         else:
             img_fnames = os.listdir(s3_path)
@@ -139,14 +149,14 @@ class CoBenchBiomassS3(NonGeoDataset):
         meta_infos = []
         for img_path in s3_paths:
             with rasterio.open(img_path) as src:
-                img = src.read()
+                img = src.read(self.band_indices)
+                img[np.isnan(img)] = 0
                 chs = []
-                for b in range(21):
-                    ch = cv2.resize(img[b], (282, 282), interpolation=cv2.INTER_CUBIC)
-                    ch = ch * self.all_band_scale[b]
+                for b in range(img.shape[0]):
+                    ch = img[b] * self.band_scales[b]
+                    ch = cv2.resize(ch, (288, 288), interpolation=cv2.INTER_CUBIC)
                     chs.append(ch)
                 img = np.stack(chs)
-                img[np.isnan(img)] = 0
                 img = torch.from_numpy(img).float()
 
                 # get lon, lat
@@ -178,11 +188,11 @@ class CoBenchBiomassS3(NonGeoDataset):
 
     def _load_target(self, index):
         pid = self.pids[index]
-        biomass_path = os.path.join(self.biomass_dir, pid)
+        biomass_path = os.path.join(self.biomass_dir, pid+".tif")
 
         with rasterio.open(biomass_path) as src:
             biomass = src.read(1)
-            biomass = cv2.resize(biomass, (282, 282), interpolation=cv2.INTER_CUBIC)
+            biomass = cv2.resize(biomass, (288, 288), interpolation=cv2.INTER_CUBIC)
             #biomass[np.isnan(biomass)] = 0
             #biomass = (biomass - self.biomass_mean) / self.biomass_std # normalize target
             biomass = torch.from_numpy(biomass.astype("float32"))
@@ -241,6 +251,7 @@ class CoBenchBiomassS3Dataset:
         self.dataset_config = config
         self.img_size = (config.image_resolution, config.image_resolution)
         self.root_dir = config.data_path
+        self.bands = config.band_names
         self.mode = config.mode
         self.band_stats = config.band_stats
         self.target_stats = config.target_stats
@@ -250,13 +261,13 @@ class CoBenchBiomassS3Dataset:
         eval_transform = RegDataAugmentation(split="test", size=self.img_size, band_stats=self.band_stats, target_stats=self.target_stats)
 
         dataset_train = CoBenchBiomassS3(
-            root=self.root_dir, split="train", mode=self.mode, transforms=train_transform
+            root=self.root_dir, split="train", bands=self.bands, mode=self.mode, transforms=train_transform
         )
         dataset_test = CoBenchBiomassS3(
-            root=self.root_dir, split="test", mode=self.mode, transforms=eval_transform
+            root=self.root_dir, split="test", bands=self.bands, mode=self.mode, transforms=eval_transform
         )
         dataset_val = CoBenchBiomassS3(
-            root=self.root_dir, split="val", mode=self.mode, transforms=eval_transform
+            root=self.root_dir, split="val", bands=self.bands, mode=self.mode, transforms=eval_transform
         )
 
         return dataset_train, dataset_val, dataset_test

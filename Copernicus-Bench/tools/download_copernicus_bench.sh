@@ -9,9 +9,10 @@ files=(
     "l1_cloud_s3/cloud_s3.zip"
     "l2_eurosat_s1s2/eurosat_s1.zip"
     "l2_eurosat_s1s2/eurosat_s2.zip"
-    "l2_bigearthnet_s1s2/bigearthnetv2-s1-10%25.tar.zst"
-    "l2_bigearthnet_s1s2/bigearthnetv2-s2-10%25.tar.zst"
-    "l2_bigearthnet_s1s2/metadata-5%25.parquet"
+    # "l2_bigearthnet_s1s2/bigearthnetv2-s1-10%25.tar.zst"
+    # "l2_bigearthnet_s1s2/bigearthnetv2-s2-10%25.tar.zst"
+    # "l2_bigearthnet_s1s2/metadata-5%25.parquet"
+    "l2_bigearthnet_s1s2/bigearthnetv2.zip" # new format
     "l2_dfc2020_s1s2/dfc2020.zip"
     "l2_lc100_s3/lc100_s3.zip"
     "l3_flood_s1/flood_s1.zip"
