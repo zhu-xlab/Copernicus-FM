@@ -10,22 +10,52 @@ import torch
 from torch import Generator, Tensor
 from torch.utils.data import random_split
 from torchgeo.datasets import BigEarthNet
-#from torchgeo.datasets.geo import NonGeoDataset
 
 from pyproj import Transformer
 from datetime import date
 import numpy as np
 import pdb
-import ast
 
 
 class CoBenchBigEarthNetS12(BigEarthNet):
-    url = 'https://huggingface.co/datasets/wangyi111/Copernicus-Bench/resolve/main/l2_bigearthnet_s1s2/bigearthnetv2.zip'
-    splits = ('train', 'val', 'test')
-    label_filenames = {
-        'train': 'multilabel-train.csv',
-        'val': 'multilabel-val.csv',
-        'test': 'multilabel-test.csv',
+    splits_metadata = {
+        "train": {
+            #"url": "https://zenodo.org/records/10891137/files/metadata.parquet", # full data
+            "url": "https://huggingface.co/datasets/wangyi111/Copernicus-Bench/resolve/main/l2_bigearthnet_s1s2/metadata-5%25.parquet",
+            "filename": "metadata-5%.parquet", #"metadata-10%.parquet",
+            "md5": "",  # unknown
+        },
+        "validation": {
+            #"url": "https://zenodo.org/records/10891137/files/metadata.parquet", # full data
+            "url": "https://huggingface.co/datasets/wangyi111/Copernicus-Bench/resolve/main/l2_bigearthnet_s1s2/metadata-5%25.parquet",
+            "filename": "metadata-5%.parquet", #"metadata-10%.parquet",
+            "md5": "",  # unknown
+        },
+        "test": {
+            #"url": "https://zenodo.org/records/10891137/files/metadata.parquet", # full data
+            "url": "https://huggingface.co/datasets/wangyi111/Copernicus-Bench/resolve/main/l2_bigearthnet_s1s2/metadata-5%25.parquet",
+            "filename": "metadata-5%.parquet", #"metadata-10%.parquet",
+            "md5": "",  # unknown
+        },
+    }
+    metadata_locs = {
+        "s1": {
+            #"url": "https://zenodo.org/records/10891137/files/BigEarthNet-S1.tar.zst",
+            "url": "https://huggingface.co/datasets/wangyi111/Copernicus-Bench/resolve/main/l2_bigearthnet_s1s2/bigearthnetv2-s1-10%25.tar.zst",
+            "directory": "BigEarthNet-S1-10%",
+            "md5": "",  # unknown
+        },
+        "s2": {
+            #"url": "https://zenodo.org/records/10891137/files/BigEarthNet-S2.tar.zst",
+            "url": "https://huggingface.co/datasets/wangyi111/Copernicus-Bench/resolve/main/l2_bigearthnet_s1s2/bigearthnetv2-s2-10%25.tar.zst",
+            "directory": "BigEarthNet-S2-10%",
+            "md5": "",  # unknown
+        },
+        "maps": {
+            #"url": "https://huggingface.co/datasets/wangyi111/Copernicus-Bench/resolve/main/l2_bigearthnet_s1s2/reference_maps-10%25.tar.zst",
+            "directory": "Reference_Maps-10%",
+            "md5": "",  # unknown
+        }, # not using maps
     }
     image_size = (120, 120)
     all_band_names_s1 = ('VV','VH')
@@ -43,7 +73,7 @@ class CoBenchBigEarthNetS12(BigEarthNet):
         checksum: bool = False,
     ) -> None:
 
-        assert split in self.splits
+        assert split in self.splits_metadata
         assert bands in ['s1', 's2']
         assert num_classes in [43, 19]
         self.root = root
@@ -64,35 +94,44 @@ class CoBenchBigEarthNetS12(BigEarthNet):
         self.class2idx_19 = {c: i for i, c in enumerate(self.class_sets[19])}
         #self._verify()
 
-        #self.folders = self._load_folders()
-        self.img_paths = []
-        self.labels = []
-        self.csv = pd.read_csv(os.path.join(self.root,self.label_filenames[self.split]))
-        for i, row in self.csv.iterrows():
-            if self.bands == 's1':
-                s1_path = os.path.join(self.root, 'BigEarthNet-S1-5%', row['s1_path'])
-                self.img_paths.append(s1_path)
-            elif self.bands == 's2':
-                s2_path = os.path.join(self.root, 'BigEarthNet-S2-5%', row['s2_path'])
-                self.img_paths.append(s2_path)
-            labels = row['labels']
-            labels_list = ast.literal_eval(labels)
-            self.labels.append(labels_list)
-
-
+        self.folders = self._load_folders()
 
         self.patch_area = (16*10/1000)**2
         self.reference_date = date(1970, 1, 1)
-
-    def __len__(self):
-        return len(self.img_paths)
 
     def get_class2idx(self, label: str, level=19):
         assert level == 19 or level == 43, "level must be 19 or 43"
         return self.class2idx_19[label] if level == 19 else self.class2idx_43[label]
 
+    def _load_folders(self) -> list[dict[str, str]]:
+        filename = self.splits_metadata[self.split]["filename"]
+        dir_s1 = self.metadata_locs["s1"]["directory"]
+        dir_s2 = self.metadata_locs["s2"]["directory"]
+        # dir_maps = self.metadata_locs["maps"]["directory"]
+
+        self.metadata = pd.read_parquet(os.path.join(self.root, filename))
+
+        self.metadata = self.metadata[
+            self.metadata['split'] == self.split
+        ].reset_index(drop=True)
+
+        def construct_folder_path(root, dir, patch_id, remove_last: int = 2):
+            tile_id = "_".join(patch_id.split("_")[:-remove_last])
+            return os.path.join(root, dir, tile_id, patch_id)
+
+        folders = [
+            {
+                "s1": construct_folder_path(self.root, dir_s1, row["s1_name"], 3),
+                "s2": construct_folder_path(self.root, dir_s2, row["patch_id"], 2),
+                # "maps": construct_folder_path(self.root, dir_maps, row["patch_id"], 2),
+            }
+            for _, row in self.metadata.iterrows()
+        ]
+
+        return folders
+
     def _load_target(self, index: int) -> Tensor:
-        image_labels = self.labels[index]
+        image_labels = self.metadata.iloc[index]["labels"]
 
         # labels -> indices
         indices = [
@@ -104,28 +143,42 @@ class CoBenchBigEarthNetS12(BigEarthNet):
 
         return image_target
 
+    def _load_paths(self, index: int) -> list[str]:
+        if self.bands == 's1':
+            folder = self.folders[index]['s1']
+            paths = glob.glob(os.path.join(folder, '*_allbands.tif'))
+            paths = sorted(paths)
+        else:
+            folder = self.folders[index]['s2']
+            paths = glob.glob(os.path.join(folder, '*_allbands.tif'))
+            paths = sorted(paths)
+
+        return paths
+
     def _load_image(self, index: int) -> Tensor:
-        path = self.img_paths[index]
-        # Bands are of different spatial resolutions
-        # Resample to (120, 120)
-        with rasterio.open(path) as src:
-            array = src.read(
-                self.band_indices,
-            ).astype('float32')
+        paths = self._load_paths(index)
+        #images = []
+        for path in paths:
+            # Bands are of different spatial resolutions
+            # Resample to (120, 120)
+            with rasterio.open(path) as src:
+                array = src.read(
+                    self.band_indices,
+                ).astype('float32')
 
-            cx,cy = src.xy(src.height // 2, src.width // 2)
-            if src.crs.to_string() != 'EPSG:4326':
-                crs_transformer = Transformer.from_crs(src.crs, 'epsg:4326', always_xy=True)
-                lon, lat = crs_transformer.transform(cx,cy)
-            else:
-                lon, lat = cx, cy
+                cx,cy = src.xy(src.height // 2, src.width // 2)
+                if src.crs.to_string() != 'EPSG:4326':
+                    crs_transformer = Transformer.from_crs(src.crs, 'epsg:4326', always_xy=True)
+                    lon, lat = crs_transformer.transform(cx,cy)
+                else:
+                    lon, lat = cx, cy
 
-            if self.bands == 's1':
-                date_str = path.split('/')[-1].split('_')[4]
-            else:
-                date_str = path.split('/')[-1].split('_')[2]
-            date_obj = date(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
-            delta = (date_obj - self.reference_date).days
+                if self.bands == 's1':
+                    date_str = path.split('/')[-1].split('_')[4]
+                else:
+                    date_str = path.split('/')[-1].split('_')[2]
+                date_obj = date(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
+                delta = (date_obj - self.reference_date).days
 
         tensor = torch.from_numpy(array).float()
         return tensor, (lon,lat), delta
@@ -304,7 +357,7 @@ class CoBenchBigEarthNetS12Dataset:
         dataset_val = CoBenchBigEarthNetS12(
             root=self.root_dir,
             num_classes=self.num_classes,
-            split="val",
+            split="validation",
             bands=self.input_bands,
             band_names=self.band_names,
             transforms=eval_transform,
