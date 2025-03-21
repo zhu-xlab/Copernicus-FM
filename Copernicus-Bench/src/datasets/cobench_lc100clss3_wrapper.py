@@ -18,7 +18,7 @@ logging.getLogger("rasterio").setLevel(logging.ERROR)
 Path: TypeAlias = str | os.PathLike[str]
 
 class CoBenchLC100ClsS3(NonGeoDataset):
-    url = "https://huggingface.co/datasets/wangyi111/Copernicus-Bench/resolve/main/l2_lc100_s3/lc100_s3.zip"
+    url = "https://huggingface.co/datasets/wangyi111/Copernicus-Bench/resolve/main/l2_lc100_s3/lc100_s3_v0.zip"
     splits = ('train', 'val', 'test')
     label_filenames = {
         'train': 'lc100_multilabel-train.csv',
