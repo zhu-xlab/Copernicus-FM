@@ -39,29 +39,29 @@ class CoBenchLC100SegS3(NonGeoDataset):
     rgb_bands = ('Oa08_radiance', 'Oa06_radiance', 'Oa04_radiance')
 
     LC100_CLSID = {
-        0: 0, # unknown
-        20: 1,
-        30: 2,
-        40: 3,
-        50: 4,
-        60: 5,
-        70: 6,
-        80: 7,
-        90: 8,
-        100: 9,
-        111: 10,
-        112: 11,
-        113: 12,
-        114: 13,
-        115: 14,
-        116: 15,
-        121: 16,
-        122: 17,
-        123: 18,
-        124: 19,
-        125: 20,
-        126: 21,
-        200: 22, # ocean
+        0: 0,   # unknown
+        20: 1,  # shrubs
+        30: 2,  # herbaceous vegetation
+        40: 3,  # cultivated and managed vegetation/agriculture
+        50: 4,  # urban / built-up
+        60: 5,  # bare / sparse vegetation
+        70: 6,  # snow and ice
+        80: 7,  # permanent water bodies
+        90: 8,  # herbaceous wetland
+        100: 9,  # moss and lichen
+        111: 10, # closed forest, evergreen needle leaf
+        112: 11, # closed forest, evergreen broad leaf
+        113: 12, # closed forest, deciduous needle leaf
+        114: 13, # closed forest, deciduous broad leaf
+        115: 14, # closed forest, mixed
+        116: 15, # closed forest, other
+        121: 16, # open forest, evergreen needle leaf
+        122: 17, # open forest, evergreen broad leaf
+        123: 18, # open forest, deciduous needle leaf
+        124: 19, # open forest, deciduous broad leaf
+        125: 20, # open forest, mixed
+        126: 21, # open forest, other
+        200: 22, # oceans, seas
     }
 
 
@@ -84,21 +84,21 @@ class CoBenchLC100SegS3(NonGeoDataset):
 
         self.bands = bands
         self.band_indices = [(self.all_band_names.index(b)+1) for b in bands if b in self.all_band_names]
+        self.band_scales = [self.all_band_scale[i-1] for i in self.band_indices]
 
         self.mode = mode
         self.img_dir = os.path.join(self.root, 's3_olci')
         #self.lc100_cls = os.path.join(self.root, self.label_filenames[split])
         self.label_dir = os.path.join(self.root, 'lc100')
-        
-        if self.mode == 'static':
-            self.static_csv = os.path.join(self.root, self.static_filenames[split])
-            with open(self.static_csv, 'r') as f:
-                lines = f.readlines()
-                self.static_img = {}
-                for line in lines:
-                    pid = line.strip().split(',')[0]
-                    img_fname = line.strip().split(',')[1]
-                    self.static_img[pid] = img_fname
+
+        self.static_csv = os.path.join(self.root, self.static_filenames[split])
+        with open(self.static_csv, 'r') as f:
+            lines = f.readlines()
+            self.static_img = {}
+            for line in lines:
+                pid = line.strip().split(',')[0]
+                img_fname = line.strip().split(',')[1]
+                self.static_img[pid] = img_fname
 
         self.pids = list(self.static_img.keys())
 
@@ -142,13 +142,13 @@ class CoBenchLC100SegS3(NonGeoDataset):
         meta_infos = []
         for img_path in s3_paths:
             with rasterio.open(img_path) as src:
-                img = src.read()
+                img = src.read(self.band_indices)
                 img[np.isnan(img)] = 0
                 chs = []
-                for b in range(21):
-                    ch = img[b]*self.all_band_scale[b]
-                    ch = cv2.resize(ch, (96,96), interpolation=cv2.INTER_CUBIC)
-                    #ch = cv2.resize(ch, (282,282), interpolation=cv2.INTER_CUBIC)
+                for b in range(img.shape[0]):
+                    ch = img[b]*self.band_scales[b]
+                    #ch = cv2.resize(ch, (96,96), interpolation=cv2.INTER_CUBIC)
+                    ch = cv2.resize(ch, (288,288), interpolation=cv2.INTER_CUBIC)
                     chs.append(ch)
                 img = np.stack(chs)
                 img = torch.from_numpy(img).float()
@@ -189,8 +189,8 @@ class CoBenchLC100SegS3(NonGeoDataset):
 
         with rasterio.open(label_path) as src:
             label = src.read(1)
-            #label = cv2.resize(label, (282,282), interpolation=cv2.INTER_NEAREST) # 0-650
-            label = cv2.resize(label, (96,96), interpolation=cv2.INTER_NEAREST) # 0-650
+            label = cv2.resize(label, (288,288), interpolation=cv2.INTER_NEAREST) # 0-650
+            #label = cv2.resize(label, (96,96), interpolation=cv2.INTER_NEAREST) # 0-650
             label_new = np.zeros_like(label)
             for k,v in self.LC100_CLSID.items():
                 label_new[label==k] = v

@@ -11,19 +11,19 @@ from pyproj import Transformer
 from datetime import date
 from typing import TypeAlias, ClassVar
 import pathlib
-
+import pandas as pd
 import logging
 
 logging.getLogger("rasterio").setLevel(logging.ERROR)
 Path: TypeAlias = str | os.PathLike[str]
 
 class CoBenchLC100ClsS3(NonGeoDataset):
-    url = "https://huggingface.co/datasets/wangyi111/Copernicus-Bench/resolve/main/l2_lc100_s3/lc100_s3_v0.zip"
+    url = "https://huggingface.co/datasets/wangyi111/Copernicus-Bench/resolve/main/l2_lc100_s3/lc100_s3.zip"
     splits = ('train', 'val', 'test')
     label_filenames = {
-        'train': 'lc100_multilabel-train.csv',
-        'val': 'lc100_multilabel-val.csv',
-        'test': 'lc100_multilabel-test.csv',
+        'train': 'multilabel-train.csv',
+        'val': 'multilabel-val.csv',
+        'test': 'multilabel-test.csv',
     }
     static_filenames = {
         'train': 'static_fnames-train.csv',
@@ -42,31 +42,30 @@ class CoBenchLC100ClsS3(NonGeoDataset):
     rgb_bands = ('Oa08_radiance', 'Oa06_radiance', 'Oa04_radiance')
 
     LC100_CLSID = {
-        0: 0, # unknown
-        20: 1,
-        30: 2,
-        40: 3,
-        50: 4,
-        60: 5,
-        70: 6,
-        80: 7,
-        90: 8,
-        100: 9,
-        111: 10,
-        112: 11,
-        113: 12,
-        114: 13,
-        115: 14,
-        116: 15,
-        121: 16,
-        122: 17,
-        123: 18,
-        124: 19,
-        125: 20,
-        126: 21,
-        200: 22, # ocean
+        0: 0,   # unknown
+        20: 1,  # shrubs
+        30: 2,  # herbaceous vegetation
+        40: 3,  # cultivated and managed vegetation/agriculture
+        50: 4,  # urban / built-up
+        60: 5,  # bare / sparse vegetation
+        70: 6,  # snow and ice
+        80: 7,  # permanent water bodies
+        90: 8,  # herbaceous wetland
+        100: 9,  # moss and lichen
+        111: 10, # closed forest, evergreen needle leaf
+        112: 11, # closed forest, evergreen broad leaf
+        113: 12, # closed forest, deciduous needle leaf
+        114: 13, # closed forest, deciduous broad leaf
+        115: 14, # closed forest, mixed
+        116: 15, # closed forest, other
+        121: 16, # open forest, evergreen needle leaf
+        122: 17, # open forest, evergreen broad leaf
+        123: 18, # open forest, deciduous needle leaf
+        124: 19, # open forest, deciduous broad leaf
+        125: 20, # open forest, mixed
+        126: 21, # open forest, other
+        200: 22, # oceans, seas
     }
-
 
     def __init__(
         self,
@@ -87,18 +86,16 @@ class CoBenchLC100ClsS3(NonGeoDataset):
 
         self.bands = bands
         self.band_indices = [(self.all_band_names.index(b)+1) for b in bands if b in self.all_band_names]
+        self.band_scales = [self.all_band_scale[i-1] for i in self.band_indices]
 
         self.mode = mode
         self.img_dir = os.path.join(self.root, 's3_olci')
         self.lc100_cls = os.path.join(self.root, self.label_filenames[split])
 
-        self.pids = []
-        self.labels = []
-        with open(self.lc100_cls, 'r') as f:
-            lines = f.readlines()
-            for line in lines:
-                self.pids.append(line.strip().split(',')[0])
-                self.labels.append(list(map(int, line.strip().split(',')[1:])))
+        df = pd.read_csv(self.lc100_cls)
+        self.pids = df['PID'].tolist()
+        self.binary_labels = df.iloc[:,1:].values
+        self.class_names = df.columns[1:]
         
         if self.mode == 'static':
             self.static_csv = os.path.join(self.root, self.static_filenames[split])
@@ -109,7 +106,6 @@ class CoBenchLC100ClsS3(NonGeoDataset):
                     pid = line.strip().split(',')[0]
                     img_fname = line.strip().split(',')[1]
                     self.static_img[pid] = img_fname
-
 
         self.reference_date = date(1970, 1, 1)
         self.patch_area = (8*300/1000)**2 # patchsize 8 pix, gsd 300m
@@ -151,11 +147,11 @@ class CoBenchLC100ClsS3(NonGeoDataset):
         meta_infos = []
         for img_path in s3_paths:
             with rasterio.open(img_path) as src:
-                img = src.read()
+                img = src.read(self.band_indices)
                 img[np.isnan(img)] = 0
                 chs = []
-                for b in range(21):
-                    ch = img[b]*self.all_band_scale[b]
+                for b in range(img.shape[0]):
+                    ch = img[b]*self.band_scales[b]
                     ch = cv2.resize(ch, (96,96), interpolation=cv2.INTER_CUBIC)
                     chs.append(ch)
                 img = np.stack(chs)
@@ -192,12 +188,8 @@ class CoBenchLC100ClsS3(NonGeoDataset):
 
     def _load_target(self, index):
 
-        label = self.labels[index]
-        labels = torch.zeros(23)
-        # turn into one-hot
-        for l in label:
-            cls_id = self.LC100_CLSID[l]
-            labels[cls_id] = 1
+        label = self.binary_labels[index]
+        labels = torch.from_numpy(label).long()
 
         return labels
 
