@@ -91,7 +91,7 @@ Copernicus-Pretrain # webdataset
 │   ├── gridID.s5p_no2.pth # 12x1x28x28, [timestamps,C,H,W]
 │   ├── gridID.s5p_o3.pth # 12x1x28x28, [timestamps,C,H,W]
 │   ├── gridID.s5p_so2.pth # 12x1x28x28, [timestamps,C,H,W]
-│   ├── gridID.dem.pth # 1x960x960, [1,H,W]
+│   ├── gridID.dem.pth # 960x960, [H,W]
 │   ├── gridID.json # grid_id, coord, date, etc.
 │   ├── ...
 ├── example-000001.tar
