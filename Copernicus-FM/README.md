@@ -117,7 +117,7 @@ Check [demo.ipynb](demo.ipynb) for detailed examples.
 
 ## License
 
-This directory is licensed under the Apache License 2.0. The model weights are licensed under the CC-BY-4.0 license.
+This directory is licensed under the Apache License 2.0, with portions of third-party code licensed under the MIT License. The model weights are licensed under the CC-BY-4.0 license.
 
 ## Citation
 

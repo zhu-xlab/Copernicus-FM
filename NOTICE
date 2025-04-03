@@ -1,0 +1,27 @@
+NOTICE
+
+This project includes code from the following third-party project(s):
+
+**Copernicus-FM**
+1. DOFA
+   - Source: https://github.com/zhu-xlab/DOFA
+   - License: MIT License  
+   - Copyright (c) 2024 Zhitong Xiong
+
+2. Aurora
+   - Source: https://github.com/microsoft/aurora
+   - License: MIT License  
+   - Copyright (c) Microsoft Corporation.
+
+3. FlexiViT
+   - Source: https://github.com/bwconrad/flexivit
+   - License: MIT License  
+   - Copyright (c) 2023 Ben Conrad
+
+**Copernicus-Bench**
+1. DOFA-pytorch
+   - Source: https://github.com/xiong-zhitong/DOFA-pytorch
+   - License: Apache-2.0 License  
+
+See the `LICENSES/` directory for full license texts.
+

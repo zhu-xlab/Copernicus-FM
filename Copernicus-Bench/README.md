@@ -118,7 +118,7 @@ See [`results/`](results/) for the benchmark results. We currently provide froze
 
 ## License
 
-This directory is licensed under the Apache License 2.0. See each dataset for its specific license.
+This directory is licensed under the Apache License 2.0, with portions of third-party code licensed under the MIT License. See each dataset for its specific license.
 
 ## Citation
 

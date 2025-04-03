@@ -67,7 +67,7 @@ Copernicus-Bench is a systematic evaluation benchmark with 15 hierarchical downs
 
 ## License
 
-This repo is licensed under the Apache License 2.0. The Copernicus-Pretrain dataset, the newly-curated datasets in Copernicus-Bench, and the pretrained weights of Copernicus-FM are licensed under the CC-BY-4.0 license.
+This repo is licensed under the Apache License 2.0, with portions of third-party code licensed under the MIT License. The Copernicus-Pretrain dataset, the newly-curated datasets in Copernicus-Bench, and the pretrained weights of Copernicus-FM are licensed under the CC-BY-4.0 license.
 
 ## Citation
 
