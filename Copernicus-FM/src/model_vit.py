@@ -40,6 +40,8 @@ class CopernicusFMViT(nn.Module):
         mlp_ratio=4.0,
         norm_layer=nn.LayerNorm,
         loc_option='lonlat',
+        return_intermediate=False,
+        intermediate_indices=None,
     ):
         super().__init__()
 
@@ -98,6 +100,9 @@ class CopernicusFMViT(nn.Module):
         self.head = (
             nn.Linear(embed_dim, num_classes) if num_classes > 0 else nn.Identity()
         )
+
+        self.return_intermediate = return_intermediate
+        self.intermediate_indices = intermediate_indices
 
     def get_coord_pos_embed(self, lons, lats, embed_dim):
         if self.loc_option == 'cartesian':
@@ -174,9 +179,13 @@ class CopernicusFMViT(nn.Module):
         cls_tokens = cls_token.expand(x.shape[0], -1, -1)
         x = torch.cat((cls_tokens, x), dim=1)
 
+        intermediate_features = []
+
         # apply Transformer blocks
-        for block in self.blocks:
+        for i,block in enumerate(self.blocks):
             x = block(x)
+            if self.return_intermediate and (i in self.intermediate_indices):
+                intermediate_features.append(x.clone())
 
         if self.global_pool:
             x = x[:, 1:, :].mean(dim=1)  # global pool without cls token
@@ -184,6 +193,10 @@ class CopernicusFMViT(nn.Module):
         else:
             x = self.norm(x)
             outcome = x[:, 0]
+
+        if self.return_intermediate:
+            return outcome, intermediate_features
+
         return outcome
 
     def forward_head(self, x, pre_logits=False):
@@ -191,9 +204,13 @@ class CopernicusFMViT(nn.Module):
         return x if pre_logits else self.head(x)
 
     def forward(self, x, meta_info, wave_list, bandwidth, language_embed, input_mode, kernel_size=None):
-        fx = self.forward_features(x, meta_info, wave_list, bandwidth, language_embed, input_mode, kernel_size)
-        x = self.forward_head(fx)
-        return x, fx
+        if self.return_intermediate:
+            x, intermediate_features = self.forward_features(x, meta_info, wave_list, bandwidth, language_embed, input_mode, kernel_size)
+            return x, intermediate_features
+        else:
+            fx = self.forward_features(x, meta_info, wave_list, bandwidth, language_embed, input_mode, kernel_size)
+            x = self.forward_head(fx)
+            return x, fx
 
 
 def vit_small_patch16(**kwargs):
