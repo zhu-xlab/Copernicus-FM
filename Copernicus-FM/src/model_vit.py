@@ -180,12 +180,21 @@ class CopernicusFMViT(nn.Module):
         x = torch.cat((cls_tokens, x), dim=1)
 
         intermediate_features = []
+        hw = num_patches_sqrt
+        hw_shape = (hw, hw)
 
         # apply Transformer blocks
         for i,block in enumerate(self.blocks):
             x = block(x)
             if self.return_intermediate and (i in self.intermediate_indices):
-                intermediate_features.append(x.clone())
+                out = x[:, 1:]
+                B, _, C = out.shape
+                out = (
+                    out.reshape(B, hw_shape[0], hw_shape[1], C)
+                    .permute(0, 3, 1, 2)
+                    .contiguous()
+                )
+                intermediate_features.append(out)
 
         if self.global_pool:
             x = x[:, 1:, :].mean(dim=1)  # global pool without cls token
