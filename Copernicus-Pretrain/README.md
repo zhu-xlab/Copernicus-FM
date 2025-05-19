@@ -76,8 +76,23 @@ Copernicus-Pretrain # geotiff
 
 We provide the dataset in two formats:
 
-- [ ] Raw format (GeoTiff): To be released soon.
-- [x] Streaming format (WebDataset): This version is available on [HuggingFace](https://huggingface.co/datasets/wangyi111/Copernicus-Pretrain).
+- [x] Raw format (GeoTiff): This version is available on [HuggingFace](https://huggingface.co/datasets/wangyi111/Copernicus-Pretrain) `raw_geotiffs_*`.
+- [x] Streaming format (WebDataset): This version is available on [HuggingFace](https://huggingface.co/datasets/wangyi111/Copernicus-Pretrain) `ssl4eo_s_*`.
+
+Raw geotiffs are organized in many `tar.zst` chunks with 1k samples (grids) per chunk per modality. The chunk IDs are aligned across modalities, i.e. `dem_grid_wgs_chunkID.tar.zst`, `s1_grd_utm_chunkID.tar.zst`, and other modalities with the same chunkID contain the same 1k grids. This is convenient for creating subdatasets from raw data. Note that ~220K grids have all modalities available (`raw_geotiffs_220k_aligned/`), while the rest ~90K grids have missing modalities (`raw_geotiffs_220k_310k_union/`). The file structure is as follows:
+
+```bash
+Copernicus-Pretrain # tar.zst
+├── s1_grd_utm_chunk001.tar.zst
+├── s2_toa_mix_chunk001.tar.zst
+├── s3_olci_wgs_chunk001.tar.zst
+├── s5p_co_wgs_chunk001.tar.zst
+├── s5p_no2_wgs_chunk001.tar.zst
+├── s5p_o3_wgs_chunk001.tar.zst
+├── s5p_so2_wgs_chunk001.tar.zst
+├── dem_grid_wgs_chunk001.tar.zst
+├── ...
+```
 
 In the webdataset format of Copernicus-Pretrain, images are converted into pytorch tensors and grouped into samples. A batch of samples (~100) are packed into a small ".tar" shard for efficient streaming and distributed training. Each sample consists of 8 ".pth" tensors corresponding to 8 modalities, and one ".json" file to store the metadata. Note that ~220K grids have all modalities available (`ssl4eo_s_220k_aligned/`), while the rest ~90K grids have missing modalities (`ssl4eo_s_220k_310k_union/`).  The detailed file structure is as follows:
 
