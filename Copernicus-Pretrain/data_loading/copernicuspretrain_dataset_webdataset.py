@@ -92,27 +92,3 @@ if __name__ == "__main__":
         sample_s1, sample_s2, sample_s3, sample_co, sample_no2, sample_o3, sample_so2, sample_dem, meta = sample
         break
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-webdataset_pth_dir = '../data/example_100_grids/reformat_webdataset_pth/'
-# shards path
-shards_path = os.path.join(webdataset_pth_dir, 'example-{000000..000009}.tar')
-batch_size = 5
-#shuffle = 8
-#train_transform = None
