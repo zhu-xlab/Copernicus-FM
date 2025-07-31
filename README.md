@@ -1,9 +1,17 @@
 # Copernicus Foundation Model
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![arXiv](https://img.shields.io/badge/arXiv-2503.11849-b31b1b.svg)](https://arxiv.org/abs/2503.11849)
+[![License: Code](https://img.shields.io/badge/License--Code-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License: model](https://img.shields.io/badge/License--Model-CC--BY--4.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![License: data](https://img.shields.io/badge/License--Data-CC--BY--4.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![HuggingFace Copernicus-FM](https://img.shields.io/badge/Model-Copernicus--FM-orange?logo=huggingface)](https://huggingface.co/wangyi111/Copernicus-FM)
+[![HuggingFace Copernicus-Pretrain](https://img.shields.io/badge/Dataset-Copernicus--Pretrain-orange?logo=huggingface)](https://huggingface.co/wangyi111/Copernicus-Pretrain)
+[![HuggingFace Copernicus-Bench](https://img.shields.io/badge/Dataset-Copernicus--Bench-orange?logo=huggingface)](https://huggingface.co/wangyi111/Copernicus-Bench)
+[![HuggingFace Copernicus-Embed-025deg](https://img.shields.io/badge/Dataset-Copernicus--Embed-orange?logo=huggingface)](https://huggingface.co/datasets/wangyi111/Copernicus-Embed-025deg)
 
-This repository contains the official implementation of the paper "[Towards a Unified Copernicus Foundation Model for Earth Vision](https://arxiv.org/abs/2503.11849)".
+
+
+This repository contains the official implementation of the paper "[Towards a Unified Copernicus Foundation Model for Earth Vision](https://arxiv.org/abs/2503.11849)" (ICCV 2025 oral).
 
 <div align="center">
 <img src="assets/altogether-1.png" alt="Description" style="width:70%;">
@@ -14,6 +22,7 @@ This repository contains the official implementation of the paper "[Towards a Un
 - 🌍 **Copernicus-Pretrain**: A massive-scale pretraining dataset with 18.7M aligned images from all major Copernicus Sentinel missions, spanning from the Earth's surface to its atmosphere.
 - 🤖 **Copernicus-FM**: A unified foundation model capable of processing any spectral or non-spectral sensor modality using extended dynamic hypernetworks and flexible metadata encoding.
 - 📊 **Copernicus-Bench**: A systematic evaluation benchmark with 15 hierarchical downstream tasks ranging from preprocessing to specialized applications for each Sentinel mission.
+- 🌐 **Copernicus-Embed-025deg**: An embedding dataset that provides a global embedding map (721x1440x768) at 0.25°, integrating various sources of satellite observations at an extremely high compression ratio.
 
 ## Copernicus-Pretrain
 
@@ -23,7 +32,7 @@ Copernicus-Pretrain is an extension of the [SSL4EO-S12](https://github.com/zhu-x
 
 🔽 **Dataset access**:
 
-- Raw format (GeoTiff): To be released soon.
+- Raw format (GeoTiff): This version is available on [HuggingFace](https://huggingface.co/datasets/wangyi111/Copernicus-Pretrain).
 - Streaming format (WebDataset): This version is available on [HuggingFace](https://huggingface.co/datasets/wangyi111/Copernicus-Pretrain).
 
 📂 **Further details:** [`Copernicus-Pretrain/`](Copernicus-Pretrain/)
@@ -64,6 +73,16 @@ Copernicus-Bench is a systematic evaluation benchmark with 15 hierarchical downs
 🔽 **Dataset access**: The benchmark datasets are available on [HuggingFace](https://huggingface.co/datasets/wangyi111/Copernicus-Bench).
 
 📂 **Further details:** [`Copernicus-Bench/`](Copernicus-Bench/)
+
+## Copernicus-Embed-025deg
+
+Copernicus-Embed-025deg is an embedding dataset that provides a global embedding map (721x1440x768) at 0.25°, integrating various sources of satellite observations at an extremely high compression ratio. It has been shown to be beneficial for linking Earth's surface to the atmosphere, unlocking new possibilities in the development of weather/climate foundation models.
+
+![embed_map](assets/embed_main-1.png)
+
+🔽 **Dataset access**: The embedding datasets are available on [HuggingFace](https://huggingface.co/datasets/wangyi111/Copernicus-Embed-025deg).
+
+📂 **Further details:** [`Copernicus-Embed-025deg/`](Copernicus-Embed-025deg/)
 
 ## License
 
