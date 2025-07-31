@@ -1,8 +1,9 @@
 # Copernicus-Embed-025deg
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![arXiv](https://img.shields.io/badge/arXiv-2503.11849-b31b1b.svg)](https://arxiv.org/abs/2503.11849)
-[![Hugging Face Datasets](https://img.shields.io/badge/huggingface-datasets-blue.svg)](https://huggingface.co/datasets/wangyi111/Copernicus-Embed-025deg)
+[![License: Code](https://img.shields.io/badge/License--Code-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License: data](https://img.shields.io/badge/License--Data-CC--BY--4.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![HuggingFace Copernicus-Embed-025deg](https://img.shields.io/badge/Dataset-Copernicus--Embed-orange?logo=huggingface)](https://huggingface.co/datasets/wangyi111/Copernicus-Embed-025deg)
 
 This directory contains information for the climate experiments in the paper "Towards a Unified Copernicus Foundation Model for Earth Vision", as well as an extended embedding dataset **Copernicus-Embed-025deg**. Originally, a subset of 0.25x0.25 grids (with all 8 modalities) are sampled from the Copernicus-Pretrain dataset and encoded using the Copernicus-FM model to get image embeddings for each modality. The embeddings are averaged over different modalities to get one embedding vector for each grid, and then used for the climate prediction tasks to investigate the potential of briding EO and climate. As a follow-up, we extend the embeddings to the whole globe using the full Copernicus-Pretrain dataset, constructing a "global embedding map" (721x1440x768, filling ocean grids with 0). This can be seen as a semantic product that integrates various sources of satellite observations at an extremely high compression ratio.
 
