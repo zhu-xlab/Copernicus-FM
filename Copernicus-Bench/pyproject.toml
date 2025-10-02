@@ -7,7 +7,7 @@ name = "Copernicus-Bench"
 adapted_from = "https://github.com/xiong-zhitong/DOFA-pytorch"
 
 dependencies = [
-    "torch==2.1.2",
+    "torch==2.8.0",
     "torchvision==0.16.2",
     "numpy==1.26.4",
     "openmim",
