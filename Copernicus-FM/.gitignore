@@ -165,3 +165,6 @@ outputs/
 **/__pycache__/
 data/
 weights/
+src/data/
+src/pretrained/
+**/wandb/

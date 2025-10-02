@@ -30,7 +30,46 @@ The model weights are available on [HuggingFace](https://huggingface.co/wangyi11
 
 ## Pretraining
 
-- [ ] To be updated soon.
+First, download the pretraining dataset into `./data/copernicus-pretrain-tar/`:
+
+```bash
+# 5 example shards, each ~5GB
+mkdir -p ./data/copernicus-pretrain-tar/
+wget https://huggingface.co/datasets/wangyi111/Copernicus-Pretrain/resolve/main/ssl4eo_s_220k_aligned/example-{000000..000004}.tar -P ./data/copernicus-pretrain-tar/
+```
+
+(Optionally) download pretrained hypenetwork weights from DOFA:
+
+```bash
+mkdir -p ./src/pretrained/
+wget https://huggingface.co/earthflow/DOFA/resolve/main/weight_generator_1000_0.01_er50k.pt -P ./src/pretrained/
+```
+
+For variable hypernetworks, we need language embeddings for each variable name. You can download our pre-encoded embeddings for S5P and DEM (using Llama3.2-1B) from:
+
+```bash
+# mkdir -p ./src/pretrained/
+wget https://huggingface.co/wangyi111/Copernicus-FM/resolve/main/varname_embed/varname_embed_llama3.2_1B.pt -P ./src/pretrained/
+```
+
+Then, setup wandb account and run the training script:
+
+```bash
+# train locally on 2 GPUs for example
+bash ./src/train_cfm_local_gpu.sh
+
+# debug locally with cpu
+# bash ./src/train_cfm_local.sh
+```
+
+Training a "base" model for 100 epochs on the full Copernicus-Pretrain dataset (220k grids, webdataset format, DDP only) takes ~60 hours on 8 A100 (40GB).
+
+For custom datasets, modify:
+- `main_pretrain.py` for dataset setup
+- `engine_pretrain.py` for loading a batch of data and sending to the model
+- `models_mae_cfm.py` for dataset-related model modifications
+- `dynamic_hypernetwork_pretrain.py` for language embeddings for the variable hypernetwork
+- `train_cfm_local_gpu.sh` for dataset-related arguments
 
 ## Using the pretrained model
 

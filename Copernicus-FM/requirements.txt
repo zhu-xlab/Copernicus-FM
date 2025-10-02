@@ -4,3 +4,6 @@ timm
 einops
 rasterio
 pyproj
+webdataset
+kornia
+tensorboard
