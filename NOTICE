@@ -18,6 +18,12 @@ This project includes code from the following third-party project(s):
    - License: MIT License  
    - Copyright (c) 2023 Ben Conrad
 
+4. MAE
+   - Source: https://github.com/facebookresearch/mae
+   - License: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+   - Copyright (c) Meta Platforms, Inc. and affiliates.
+
+
 **Copernicus-Bench**
 1. DOFA-pytorch
    - Source: https://github.com/xiong-zhitong/DOFA-pytorch
