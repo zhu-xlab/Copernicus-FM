@@ -86,7 +86,7 @@ Copernicus-Embed-025deg is an embedding dataset that provides a global embedding
 
 ## License
 
-This repo is licensed under the Apache License 2.0, with portions of third-party code licensed under the MIT License. The Copernicus-Pretrain dataset, the newly-curated datasets in Copernicus-Bench, and the pretrained weights of Copernicus-FM are licensed under the CC-BY-4.0 license.
+This repo is licensed under the Apache License 2.0, with portions of third-party code licensed under the MIT/CC-BY-NC-4.0 License. The Copernicus-Pretrain dataset, the newly-curated datasets in Copernicus-Bench, and the pretrained weights of Copernicus-FM are licensed under the CC-BY-4.0 license.
 
 ## Citation
 
